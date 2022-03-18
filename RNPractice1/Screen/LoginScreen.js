@@ -19,7 +19,9 @@ import AsyncStorage from '@react-native-community/async-storage';
 
 import Loader from './Components/Loader';
 
+
 const LoginScreen = ({navigation}) => {
+  
   const [userEmail, setUserEmail] = useState('');
   const [userPassword, setUserPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,7 +29,9 @@ const LoginScreen = ({navigation}) => {
 
   const passwordInputRef = createRef();
 
-  const handleSubmitPress = () => {
+ 
+
+   handleSubmitPress = () => {
     setErrortext('');
     if (!userEmail) {
       alert('Please fill Email');
@@ -37,46 +41,48 @@ const LoginScreen = ({navigation}) => {
       alert('Please fill Password');
       return;
     }
+    console.log('click login')
+    console.log('ID : ', userEmail)
+    console.log('PW : ', userPassword)
+    var url = '/user_inform/onLogin';
     setLoading(true);
-    let dataToSend = {user_email: userEmail, user_password: userPassword};
-    let formBody = [];
-    for (let key in dataToSend) {
-      let encodedKey = encodeURIComponent(key);
-      let encodedValue = encodeURIComponent(dataToSend[key]);
-      formBody.push(encodedKey + '=' + encodedValue);
-    }
-    formBody = formBody.join('&');
-
-    fetch('https://aboutreact.herokuapp.com/login.php', {
-      method: 'POST',
-      body: formBody,
-      headers: {
-        //Header Defination
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-      },
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        //Hide Loader
+    axios.post(url,null, {
+      params:{user_email: userEmail, 
+      user_password: userPassword
+    }})
+      .then((response) =>  {
+        console.log(response);
+        console.log('res.data.userId :: ', res.data.userEmail)
+        console.log('res.data.msg :: ', res.data.msg)
         setLoading(false);
-        console.log(responseJson);
-        // If server response message same as Data Matched
-        if (responseJson.status == 0) {
-          AsyncStorage.setItem('user_id', 'hi');
-         // console.log(responseJson.data[0].user_id);
-          navigation.replace('DrawerNavigationRoutes');
-        } else {
-          setErrortext('Please check your email id or password');
-          console.log('Please check your email id or password');
+       
+
+         if(res.data.userEmail === undefined){
+            // id 일치하지 않는 경우 userId = undefined, msg = '입력하신 id 가 일치하지 않습니다.'
+            console.log('======================',res.data.msg)
+            alert('입력하신 id 가 일치하지 않습니다.')
+        } else if(res.data.userEmail === null){
+            // id는 있지만, pw 는 다른 경우 userId = null , msg = undefined
+            console.log('======================','입력하신 비밀번호 가 일치하지 않습니다.')
+            alert('입력하신 비밀번호 가 일치하지 않습니다.')
+        } else if(res.data.userEmail === userEmail) {
+            // id, pw 모두 일치 userId = userId1, msg = undefined
+            console.log('======================','로그인 성공')
+            AsyncStorage.setItem('user_id', userEmail)
         }
       })
       .catch((error) => {
         //Hide Loader
         setLoading(false);
         console.error(error);
-      });
-  };
+      }); 
+      useEffect(() => {
+        axios.get('/user_inform/login')
+        .then(res => console.log(res))
+        .catch()
+    },[])}
 
+  
   return (
     <View style={styles.mainBody}>
       <Loader loading={loading} />
@@ -138,12 +144,12 @@ const LoginScreen = ({navigation}) => {
               style={styles.buttonStyle}
               activeOpacity={0.5}
               onPress={handleSubmitPress}>
-              <Text style={styles.buttonTextStyle}>LOGIN</Text>
+              <Text style={styles.buttonTextStyle}>로그인</Text>
             </TouchableOpacity>
             <Text
               style={styles.registerTextStyle}
               onPress={() => navigation.navigate('RegisterScreen')}>
-              New Here ? Register
+              아직 회원이 아니신가요 ? 회원가입
             </Text>
           </KeyboardAvoidingView>
         </View>
@@ -151,6 +157,7 @@ const LoginScreen = ({navigation}) => {
     </View>
   );
 };
+
 export default LoginScreen;
 
 const styles = StyleSheet.create({

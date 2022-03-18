@@ -2,7 +2,7 @@
 // https://aboutreact.com/react-native-login-and-signup/
 
 // Import React and Component
-import React, {useState, createRef} from 'react';
+import React, {useState, createRef, Component} from 'react';
 import {
   StyleSheet,
   TextInput,

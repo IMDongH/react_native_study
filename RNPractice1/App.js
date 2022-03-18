@@ -15,7 +15,7 @@ import LoginScreen from './Screen/LoginScreen';
 import RegisterScreen from './Screen/RegisterScreen';
 import DrawerNavigationRoutes from './Screen/DrawerNavigationRoutes';
 
-const Stack = createStackNavigator();
+
 
 const Auth = () => {
   // Stack Navigator for Login and Sign up Screen
