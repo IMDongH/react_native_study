@@ -21,5 +21,5 @@ app.use('register', require("./user.register"));
 app.use('login', require("./user.login"));
 
 app.listen(3000, ()=>{
-    console.log('Server aktif di port 3000')
+    console.log('Server aktif di port ')
 });
