@@ -47,7 +47,7 @@ const LoginScreen = ({navigation}) => {
     }
     formBody = formBody.join('&');
 
-    fetch('http://localhost:3000/user' ,{
+    fetch('https://127.0.0.1:3000' ,{
       method: 'POST',
       body: formBody,
       headers: {
