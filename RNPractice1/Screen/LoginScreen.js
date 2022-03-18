@@ -1,4 +1,4 @@
-// Example of Splash, Login and Sign Up in React Native
+    // Example of Splash, Login and Sign Up in React Native
 // https://aboutreact.com/react-native-login-and-signup/
 
 // Import React and Component
@@ -38,7 +38,7 @@ const LoginScreen = ({navigation}) => {
       return;
     }
     setLoading(true);
-    let dataToSend = {user_email: userEmail, user_password: userPassword};
+    let dataToSend = {useremail: userEmail, userpassword: userPassword};
     let formBody = [];
     for (let key in dataToSend) {
       let encodedKey = encodeURIComponent(key);
@@ -47,7 +47,7 @@ const LoginScreen = ({navigation}) => {
     }
     formBody = formBody.join('&');
 
-    fetch('https://aboutreact.herokuapp.com/login.php', {
+    fetch('http://localhost:3000/user' ,{
       method: 'POST',
       body: formBody,
       headers: {
@@ -61,8 +61,8 @@ const LoginScreen = ({navigation}) => {
         setLoading(false);
         console.log(responseJson);
         // If server response message same as Data Matched
-        if (responseJson.status == 0) {
-          AsyncStorage.setItem('user_id', 'hi');
+        if (responseJson.status === 'success') {
+          AsyncStorage.setItem('user_id', responseJson.data.userEmail);
          // console.log(responseJson.data[0].user_id);
           navigation.replace('DrawerNavigationRoutes');
         } else {
