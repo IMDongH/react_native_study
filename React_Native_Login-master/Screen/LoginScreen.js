@@ -14,7 +14,7 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
 } from 'react-native';
-
+import axios from 'axios';
 import AsyncStorage from '@react-native-community/async-storage';
 
 import Loader from './Components/Loader';
@@ -38,7 +38,7 @@ const LoginScreen = ({navigation}) => {
       return;
     }
     setLoading(true);
-    let dataToSend = {user_email: userEmail, user_password: userPassword};
+    let dataToSend = {userEmail: userEmail, userPassword: userPassword};
     let formBody = [];
     for (let key in dataToSend) {
       let encodedKey = encodeURIComponent(key);
@@ -47,34 +47,28 @@ const LoginScreen = ({navigation}) => {
     }
     formBody = formBody.join('&');
 
-    fetch('http://127.0.0.1:4000', {
-      method: 'POST',
-      body: formBody,
-      headers: {
-        //Header Defination
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-      },
+    axios.get('http://192.168.35.43:4000/', {
+      params: {userEmail: userEmail, userPassword: userPassword}
     })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        //Hide Loader
-        setLoading(false);
-        console.log(responseJson);
-        // If server response message same as Data Matched
-        if (responseJson.status === 'success') {
-          AsyncStorage.setItem('user_id', responseJson.data.userEmail);
-         // console.log(responseJson.data[0].user_id);
-          navigation.replace('DrawerNavigationRoutes');
-        } else {
-          setErrortext('Please check your email id or password');
-          console.log('Please check your email id or password');
-        }
-      })
-      .catch((error) => {
-        //Hide Loader
-        setLoading(false);
-        console.error(error);
-      });
+    .then(function (response) {
+      console.log(response.data.status);
+      setLoading(false);
+      if (response.data.status === 'success') {
+        AsyncStorage.setItem('user_id', response.data.data.userEmail);
+       // console.log(response.data.data.user_id);
+        navigation.replace('DrawerNavigationRoutes');
+      } else {
+        setErrortext('Please check your email id or password');
+        console.log('Please check your email id or password');
+      }
+    })
+    .catch((error) => {
+      //Hide Loader
+      setLoading(false);
+      console.error("error",error);
+    });
+     
+    
   };
 
   return (

@@ -16,16 +16,11 @@ const db = mysql.createConnection({
 });
 
 db.connect();
-
-app.get('/', function(req,res){
-    var sql = 'SELECT * FROM RNTest';
+var sql = 'SELECT * FROM RNTest';
     db.query(sql, (err, result)=>{
         if(err) throw err;
-        console.log(result);
-        res.send(result);
+        console.log("RESULT",result);
     });
-    });
-    
     
     app.post('/', function (req, res) {
         let body = req.body;
@@ -54,7 +49,43 @@ app.get('/', function(req,res){
           });
       });
       });
-app.use('login', require("./user.login"));
+      
+      app.get('/', function (req, res) {
+        let body = req.query;
+        console.log("body",body)
+        if(!body.userEmail){
+            console.log("student")
+            res.status(500).send({
+                message: "student id is null"
+            });
+            return;
+        }
+    
+        // let result = await findOne({
+        //     where: {
+        //         userEmail: body.userEmail
+        //     }
+        // });
+    
+        // let dbPassword = result.dataValues.userPassword;
+        let inputPassword = body.userPassword;
+    
+        if (inputPassword) {
+            console.log("SUCCESS")
+            res.send({
+                message: "Login success",
+                status:'success',
+                data:{
+                    userEmail:body.userEmail
+                }
+            });
+        }
+        else {
+            res.status(500).send({
+                message: "Wrong Password"
+            });
+        }
+    })
 
 app.listen(4000, ()=>{
     console.log('Server aktif di port ')
