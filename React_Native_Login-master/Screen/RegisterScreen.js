@@ -13,12 +13,13 @@ import {
   Keyboard,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from 'react-native';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-
+import axios from 'axios';
 import 'react-native-gesture-handler';
 import Loader from './Components/Loader';
 
@@ -49,7 +50,7 @@ const RegisterScreen = (props) => {
       alert('id를 입력해주세요');
       return;
     }
-    if (isNaN(userAge)) {
+    if (!userAge) {
       alert('나이를 입력해주세요');
       return;
     }
@@ -64,12 +65,13 @@ const RegisterScreen = (props) => {
     }
     //Show Loader
     setLoading(true);
-    var dataToSend = {
+    var dataToSend = ({
       userName: userName,
+      userPassword: userPassword,
       userEmail: userEmail,
       userAge: userAge,
-      userpassword: userPassword,
-    };
+      
+    });
     var formBody = [];
     for (var key in dataToSend) {
       var encodedKey = encodeURIComponent(key);
@@ -77,33 +79,27 @@ const RegisterScreen = (props) => {
       formBody.push(encodedKey + '=' + encodedValue);
     }
     formBody = formBody.join('&');
-
-    fetch('http://192.168.35.43:4000',{
-      method: 'POST',
-      body: formBody,
-      headers: {
-        //Header Defination
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-      },
+    axios.post('http://192.168.35.43:4000/', {
+      userName: userName,
+      userPassword: userPassword,
+      userEmail: userEmail,
+      userAge: userAge,
     })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        //Hide Loader
-        setLoading(false);
-        console.log(responseJson);
-        // If server response message same as Data Matched
-        if (responseJson.status === 'success') {
-          setIsRegistraionSuccess(true);
-          console.log('Registration Successful. Please Login to proceed');
-        } else if (responseJson.status === 'duplicate') {
-          setErrortext2('이미 존재하는 아이디입니다.');
-        }
-      })
-      .catch((error) => {
-        //Hide Loader
-        setLoading(false);
-        console.error(error);
-      });
+    .then(function (response) {
+      console.log(response.data.status);
+      setLoading(false);
+      if (response.data.status == 'success') {
+        setIsRegistraionSuccess(true);
+        console.log('Registration Successful. Please Login to proceed');
+      } else if (response.data.status == 'duplicate') {
+        setErrortext2('이미 존재하는 아이디입니다.');
+      }
+    })
+    .catch((error) => {
+      //Hide Loader
+      setLoading(false);
+      console.error(error);
+    });
   };
   if (isRegistraionSuccess) {
     return (
@@ -232,7 +228,7 @@ const RegisterScreen = (props) => {
        <TextInput
           style={styles.textFormTop}
           placeholder={'나이'}
-          onChangeText={(userAge) => setUserName(userAge)}
+          onChangeText={(userAge) => setUserAge(userAge)}
           ref={nameInputRef}
           returnKeyType="next"
           onSubmitEditing={() =>
