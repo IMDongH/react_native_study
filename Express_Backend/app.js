@@ -30,6 +30,6 @@ app.get('/', function(req,res){
 app.use('register', require("./user.register"));
 app.use('login', require("./user.login"));
 
-app.listen(3000, ()=>{
+app.listen(4000, ()=>{
     console.log('Server aktif di port ')
 });
