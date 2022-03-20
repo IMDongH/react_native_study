@@ -22,6 +22,7 @@ var sql = 'SELECT * FROM RNTest';
         console.log("RESULT",result);
     });
     
+
     app.post('/', function (req, res) {
         let body = req.body;
         console.log("body",body)
@@ -42,7 +43,7 @@ var sql = 'SELECT * FROM RNTest';
       
         db.query(sql, userInfo, (err, result)=>{
           if(err) {throw err;
-        console.log("error",err)}
+            console.log("error",err)}
           console.log("result",result);
           res.send({
               status:'success',
@@ -50,42 +51,54 @@ var sql = 'SELECT * FROM RNTest';
       });
       });
       
-      app.get('/', function (req, res) {
+
+        app.get('/', function (req, res) {
+       
         let body = req.query;
-        console.log("body",body)
-        if(!body.userEmail){
-            console.log("student")
-            res.status(500).send({
-                message: "student id is null"
-            });
-            return;
-        }
-    
-        // let result = await findOne({
-        //     where: {
-        //         userEmail: body.userEmail
-        //     }
-        // });
-    
-        // let dbPassword = result.dataValues.userPassword;
-        let inputPassword = body.userPassword;
-    
-        if (inputPassword) {
-            console.log("SUCCESS")
-            res.send({
-                message: "Login success",
-                status:'success',
-                data:{
-                    userEmail:body.userEmail
+        const userEmail = body.userEmail
+        const userPassword = body.userPassword
+        const sql1 = 'SELECT COUNT(*) AS result FROM RNTest WHERE userEmail = ?'
+        db.query(sql1, userEmail, (err, data) => {
+            if(!err) {
+               
+                if(data[0].result < 1) {
+                    res.status(500).send({
+                        message: "student id is null"
+                    });
+                    
+                    return;
+                } else { // 동일한 id 가 있으면 비밀번호 일치 확인
+                    const sql2 = `SELECT 
+                                    CASE (SELECT COUNT(*) FROM RNTest WHERE userEmail = ? AND userPassword = ?)
+                                        WHEN '0' THEN NULL
+                                        ELSE (SELECT userEmail FROM RNTest WHERE userEmail = ? AND userPassword = ?)
+                                    END AS userId
+                                    , CASE (SELECT COUNT(*) FROM RNTest WHERE userEmail = ? AND userPassword = ?)
+                                        WHEN '0' THEN NULL
+                                        ELSE (SELECT userPassword FROM RNTest WHERE userEmail = ? AND userPassword = ?)
+                                    END AS userPw`;
+                    // sql 란에 필요한 parameter 값을 순서대로 기재
+                    const params = [userEmail, userPassword, userEmail, userPassword, userEmail, userPassword, userEmail, userPassword]
+                    db.query(sql2, params, (err, data) => {              
+                        if(!err) {
+                            res.send({
+                                message: "Login success",
+                                status:'success',
+                                data:{
+                                    userEmail:body.userEmail
+                                }
+                            });
+                        } else {
+                            res.send(err)
+                        }
+                    })
                 }
-            });
-        }
-        else {
-            res.status(500).send({
-                message: "Wrong Password"
-            });
-        }
+            } else {
+                res.send(err)
+            }
+        })
     })
+
 
 app.listen(4000, ()=>{
     console.log('Server aktif di port ')
